@@ -41,7 +41,7 @@ These accounts are pre-loaded for testing and evaluation purposes:
 |---------|-------------|--------------|
 | Admin   | 9999999999  | admin123     |
 | Analyst | 8888888888  | analyst123   |
-| User    | 7777777777  | user123      |
+| User    | 9876543210  | rohan123      |
 
 ---
 
