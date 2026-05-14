@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Finance Tracker – My Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #070d1a; --surface: #0d1626;
+            --surface2: rgba(255,255,255,0.03);
+            --border: rgba(99,179,237,0.12);
+            --accent: #63b3ed; --accent2: #4fd1c5;
+            --green: #68d391; --red: #fc8181; --yellow: #f6e05e;
+            --text: #e2e8f0; --muted: #64748b;
+        }
+
+        body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+
+        body::before {
+            content: ''; position: fixed; inset: 0;
+            background-image:
+                linear-gradient(rgba(99,179,237,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(99,179,237,0.03) 1px, transparent 1px);
+            background-size: 48px 48px; pointer-events: none;
+        }
+
+        .topbar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 32px; height: 64px;
+            background: rgba(13,22,38,0.95); border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 100;
+        }
+        .brand {
+            display: flex; align-items: center; gap: 10px;
+            font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .brand-icon {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px;
+        }
+        .topbar-right { display: flex; align-items: center; gap: 12px; }
+        .logout-btn {
+            background: rgba(252,129,129,0.12); color: var(--red);
+            padding: 7px 16px; border-radius: 8px; text-decoration: none;
+            font-size: 13px; font-weight: 500; border: 1px solid rgba(252,129,129,0.2);
+            transition: background 0.2s, transform 0.15s;
+        }
+        .logout-btn:hover { background: rgba(252,129,129,0.2); transform: translateY(-1px); }
+
+        .flash-container { padding: 16px 32px 0; }
+        .flash { padding: 12px 18px; border-radius: 10px; font-size: 14px; font-weight: 500; margin-bottom: 8px; border: 1px solid transparent; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+        .flash.success { background: rgba(104,211,145,0.1); border-color: rgba(104,211,145,0.25); color: var(--green); }
+        .flash.danger  { background: rgba(252,129,129,0.1); border-color: rgba(252,129,129,0.25); color: var(--red); }
+        .flash.info    { background: rgba(99,179,237,0.1);  border-color: rgba(99,179,237,0.25);  color: var(--accent); }
+
+        .page-header {
+            padding: 36px 32px 0; display: flex; align-items: center;
+            justify-content: space-between; flex-wrap: wrap; gap: 12px;
+        }
+        .page-header-left h1 { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+        .page-header-left h1 span {
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .page-header-left p { color: var(--muted); font-size: 13px; font-weight: 300; }
+        .role-badge {
+            display: inline-block; padding: 4px 14px; border-radius: 20px;
+            font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;
+            background: rgba(99,179,237,0.1); color: var(--accent); border: 1px solid rgba(99,179,237,0.25);
+        }
+
+        .main { padding: 28px 32px 60px; display: flex; flex-direction: column; gap: 24px; max-width: 1200px; }
+
+        .stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 18px; }
+        .stat-card {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+            padding: 22px 24px; animation: slideUp 0.5s cubic-bezier(0.16,1,0.3,1) both;
+        }
+        .stat-card:nth-child(1) { animation-delay: 0.05s; }
+        .stat-card:nth-child(2) { animation-delay: 0.10s; }
+        .stat-card:nth-child(3) { animation-delay: 0.15s; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .stat-card-label { font-size: 11px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+        .stat-card-value { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; }
+        .stat-card.income  .stat-card-value { color: var(--green); }
+        .stat-card.expense .stat-card-value { color: var(--red); }
+        .stat-card.balance .stat-card-value {
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; animation: slideUp 0.5s cubic-bezier(0.16,1,0.3,1) both; animation-delay: 0.2s; }
+        .card-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-bottom: 1px solid var(--border); }
+        .card-header-left { display: flex; align-items: center; gap: 12px; }
+        .card-header-icon { width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+        .icon-blue   { background: rgba(99,179,237,0.12); }
+        .icon-green  { background: rgba(104,211,145,0.12); }
+        .icon-yellow { background: rgba(246,224,94,0.12); }
+        .card-header-icon-text h3 { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+        .card-header-icon-text p  { font-size: 12px; color: var(--muted); }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr auto; gap: 12px; align-items: end; padding: 20px 22px; }
+        .field label { display: block; font-size: 11px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+        input, select {
+            width: 100%; padding: 10px 12px;
+            background: var(--surface2); border: 1px solid var(--border);
+            border-radius: 9px; color: var(--text);
+            font-family: 'DM Sans', sans-serif; font-size: 14px;
+            transition: border-color 0.2s, box-shadow 0.2s; outline: none;
+        }
+        input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(99,179,237,0.1); }
+        input[type="date"] { color-scheme: dark; }
+        input::placeholder { color: #334155; }
+        select option { background: #0d1626; }
+        .btn-add {
+            padding: 10px 20px; border: none; border-radius: 9px;
+            background: linear-gradient(135deg, var(--green), #38a169); color: #0d1a12;
+            font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600;
+            cursor: pointer; white-space: nowrap; transition: opacity 0.2s, transform 0.15s;
+            box-shadow: 0 4px 14px rgba(104,211,145,0.2);
+        }
+        .btn-add:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        table { width: 100%; border-collapse: collapse; }
+        thead tr { border-bottom: 1px solid var(--border); }
+        th { padding: 11px 16px; text-align: left; font-size: 11px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+        td { padding: 13px 16px; font-size: 14px; border-bottom: 1px solid rgba(99,179,237,0.05); }
+        tbody tr { transition: background 0.15s; }
+        tbody tr:hover { background: rgba(99,179,237,0.03); }
+        tbody tr:last-child td { border-bottom: none; }
+
+        .type-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+        .type-badge.income  { background: rgba(104,211,145,0.12); color: var(--green); }
+        .type-badge.expense { background: rgba(252,129,129,0.12); color: var(--red); }
+
+        .amount { font-weight: 600; font-family: 'Playfair Display', serif; font-size: 15px; }
+        .amount.income  { color: var(--green); }
+        .amount.expense { color: var(--red); }
+
+        .del-btn {
+            background: rgba(252,129,129,0.1); color: var(--red);
+            border: 1px solid rgba(252,129,129,0.2); padding: 5px 12px;
+            border-radius: 7px; font-size: 12px; font-weight: 500;
+            text-decoration: none; display: inline-block; transition: background 0.2s, transform 0.15s;
+        }
+        .del-btn:hover { background: rgba(252,129,129,0.2); transform: translateY(-1px); }
+
+        .empty-state { text-align: center; padding: 48px 20px; color: var(--muted); }
+        .empty-state .empty-icon { font-size: 36px; margin-bottom: 12px; }
+        .empty-state p { font-size: 14px; }
+
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+
+        .recent-list { padding: 8px 0; }
+        .recent-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 22px; border-bottom: 1px solid rgba(99,179,237,0.05); transition: background 0.15s; }
+        .recent-item:last-child { border-bottom: none; }
+        .recent-item:hover { background: rgba(99,179,237,0.03); }
+        .recent-left { display: flex; flex-direction: column; gap: 3px; }
+        .recent-action { font-size: 14px; font-weight: 500; }
+        .recent-details { font-size: 12px; color: var(--muted); }
+        .recent-time { font-size: 12px; color: var(--muted); white-space: nowrap; }
+
+        @media (max-width: 900px) {
+            .stats-row { grid-template-columns: 1fr 1fr; }
+            .two-col { grid-template-columns: 1fr; }
+            .form-grid { grid-template-columns: 1fr 1fr; }
+            .form-grid .btn-add { grid-column: 1 / -1; width: 100%; }
+        }
+        @media (max-width: 600px) {
+            .stats-row { grid-template-columns: 1fr; }
+            .main, .page-header { padding-left: 16px; padding-right: 16px; }
+            .topbar { padding: 0 16px; }
+            .form-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="topbar">
+        <div class="brand">
+            <div class="brand-icon">💰</div>
+            Finance Tracker
+        </div>
+        <div class="topbar-right">
+            <a href="{{ url_for('logout') }}" class="logout-btn">↩ Logout</a>
+        </div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-container">
+        {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <div class="page-header">
+        <div class="page-header-left">
+            <!-- MySQL returns lowercase keys: user.name, user.phone, user.dob, user.role -->
+            <h1>👋 Welcome, <span>{{ user.name }}</span></h1>
+            <p>📱 {{ user.phone }} &nbsp;·&nbsp; 🗓 Member since {{ user.dob }}</p>
+        </div>
+        <span class="role-badge">{{ user.role }}</span>
+    </div>
+
+    <div class="main">
+
+        <!-- SUMMARY STATS -->
+        {% if summary %}
+        <div class="stats-row">
+            <div class="stat-card income">
+                <div class="stat-card-label">💹 Total Income</div>
+                <div class="stat-card-value">₹{{ summary.TotalIncome }}</div>
+            </div>
+            <div class="stat-card expense">
+                <div class="stat-card-label">💸 Total Expenses</div>
+                <div class="stat-card-value">₹{{ summary.TotalExpense }}</div>
+            </div>
+            <div class="stat-card balance">
+                <div class="stat-card-label">🏦 Current Balance</div>
+                <div class="stat-card-value">₹{{ summary.CurrentBalance }}</div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- ADD TRANSACTION -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-header-left">
+                    <div class="card-header-icon icon-green">➕</div>
+                    <div class="card-header-icon-text">
+                        <h3>Add Transaction</h3>
+                        <p>Record a new income or expense</p>
+                    </div>
+                </div>
+            </div>
+            <form method="POST" action="/add_transaction">
+                <div class="form-grid">
+                    <div class="field">
+                        <label>Amount (₹)</label>
+                        <input name="Amount" type="number" min="1" step="0.01" placeholder="0.00" required>
+                    </div>
+                    <div class="field">
+                        <label>Type</label>
+                        <select name="Type" required>
+                            <option value="" disabled selected>Select…</option>
+                            <option value="Income">Income</option>
+                            <option value="Expense">Expense</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Category</label>
+                        <input name="Category" placeholder="e.g. Salary, Food, Rent" required>
+                    </div>
+                    <div class="field">
+                        <label>Date</label>
+                        <input name="Date" type="date" required>
+                    </div>
+                    <div class="field">
+                        <label>Notes</label>
+                        <input name="Notes" placeholder="Optional note">
+                    </div>
+                    <button class="btn-add" type="submit">+ Add</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- MONTHLY BREAKDOWN -->
+        {% if summary.MonthlySummary %}
+        <div class="card">
+            <div class="card-header">
+                <div class="card-header-left">
+                    <div class="card-header-icon icon-blue">📅</div>
+                    <div class="card-header-icon-text">
+                        <h3>Monthly Breakdown</h3>
+                        <p>Net balance per month — green is surplus, red is deficit</p>
+                    </div>
+                </div>
+            </div>
+            <div style="padding: 20px 22px 24px;">
+                <div style="position: relative; height: 220px;">
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+        <script>
+            const monthlyData = {{ summary.MonthlySummary | tojson }};
+            const labels = Object.keys(monthlyData);
+            const values = Object.values(monthlyData);
+            new Chart(document.getElementById('monthlyChart'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: values.map(v => v >= 0 ? 'rgba(104,211,145,0.75)' : 'rgba(252,129,129,0.75)'),
+                        borderRadius: 5, borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { ticks: { color: '#64748b', font: { size: 12 }, autoSkip: false, maxRotation: 45 }, grid: { display: false } },
+                        y: { ticks: { color: '#64748b', font: { size: 11 }, callback: v => '₹' + v.toLocaleString() }, grid: { color: 'rgba(99,179,237,0.08)' } }
+                    }
+                }
+            });
+        </script>
+        {% endif %}
+
+        <!-- TWO COLUMN: RECENT ACTIVITY + PASSBOOK -->
+        <div class="two-col">
+
+            <!-- RECENT ACTIVITY — last 5 passbook entries -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-header-left">
+                        <div class="card-header-icon icon-blue">🕐</div>
+                        <div class="card-header-icon-text">
+                            <h3>Recent Activity</h3>
+                            <p>Last 5 passbook entries</p>
+                        </div>
+                    </div>
+                </div>
+                {% if recent_txns %}
+                <div class="recent-list">
+                    {% for entry in recent_txns %}
+                    <div class="recent-item">
+                        <div class="recent-left">
+                            <!-- MySQL passbook fields: action, details, timestamp -->
+                            <span class="recent-action">{{ entry.action }}</span>
+                            <span class="recent-details">{{ entry.details }}</span>
+                        </div>
+                        <span class="recent-time">{{ entry.timestamp }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">📭</div>
+                    <p>No recent activity found.</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- PASSBOOK -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-header-left">
+                        <div class="card-header-icon icon-yellow">📒</div>
+                        <div class="card-header-icon-text">
+                            <h3>Passbook</h3>
+                            <p>Full audit log</p>
+                        </div>
+                    </div>
+                </div>
+                {% if passbook %}
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Action</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entry in passbook %}
+                            <tr>
+                                <!-- MySQL passbook fields: timestamp, action, details (all lowercase) -->
+                                <td style="color: var(--muted); font-size: 13px;">{{ entry.timestamp }}</td>
+                                <td>{{ entry.action }}</td>
+                                <td style="color: var(--muted); font-size: 13px;">{{ entry.details }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">📒</div>
+                    <p>No passbook entries yet.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- ALL TRANSACTIONS -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-header-left">
+                    <div class="card-header-icon icon-blue">💳</div>
+                    <div class="card-header-icon-text">
+                        <h3>All Transactions</h3>
+                        <p>Your complete transaction history</p>
+                    </div>
+                </div>
+            </div>
+            {% if transactions %}
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Date</th>
+                            <th>Category</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Notes</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for t in transactions %}
+                        <tr>
+                            <td style="color: var(--muted); font-size: 13px;">{{ loop.index }}</td>
+                            <!-- MySQL transactions fields: date, category, type, amount, notes, id (all lowercase) -->
+                            <td style="color: var(--muted); font-size: 13px;">{{ t.date }}</td>
+                            <td>{{ t.category }}</td>
+                            <td><span class="type-badge {{ t.type | lower }}">{{ t.type }}</span></td>
+                            <td>
+                                <span class="amount {{ t.type | lower }}">
+                                    {% if t.type == "Income" %}+{% else %}−{% endif %}₹{{ t.amount }}
+                                </span>
+                            </td>
+                            <td style="color: var(--muted); font-size: 13px;">{{ t.notes or '—' }}</td>
+                            <td>
+                                <!-- t.id is the MySQL primary key, replaces TxnIndex -->
+                                <a href="/delete_transaction/{{ t.id }}" class="del-btn"
+                                   onclick="return confirm('Delete this transaction?')">🗑 Delete</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">📭</div>
+                <p>No transactions yet. Add one above to get started.</p>
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+</body>
+</html>

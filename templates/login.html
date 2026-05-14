@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Finance Tracker – Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #070d1a;
+            --surface: #0d1626;
+            --border: rgba(99,179,237,0.15);
+            --accent: #63b3ed;
+            --accent2: #4fd1c5;
+            --text: #e2e8f0;
+            --muted: #64748b;
+        }
+
+        body {
+            background: var(--bg); color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            min-height: 100vh; display: flex;
+            align-items: center; justify-content: center; overflow: hidden;
+        }
+
+        body::before {
+            content: ''; position: fixed; inset: 0;
+            background-image:
+                linear-gradient(rgba(99,179,237,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(99,179,237,0.04) 1px, transparent 1px);
+            background-size: 48px 48px;
+            animation: gridShift 20s linear infinite; pointer-events: none;
+        }
+        @keyframes gridShift { 0% { transform: translate(0,0); } 100% { transform: translate(48px,48px); } }
+
+        .orb { position: fixed; border-radius: 50%; filter: blur(80px); opacity: 0.18; pointer-events: none; animation: pulse 6s ease-in-out infinite alternate; }
+        .orb-1 { width: 400px; height: 400px; background: #63b3ed; top: -100px; left: -100px; }
+        .orb-2 { width: 350px; height: 350px; background: #4fd1c5; bottom: -100px; right: -80px; animation-delay: 2s; }
+        @keyframes pulse { from { opacity: 0.12; transform: scale(1); } to { opacity: 0.22; transform: scale(1.08); } }
+
+        .card {
+            position: relative; background: var(--surface);
+            border: 1px solid var(--border); border-radius: 20px;
+            padding: 50px 44px; width: 420px;
+            box-shadow: 0 0 60px rgba(99,179,237,0.07), 0 30px 60px rgba(0,0,0,0.5);
+            animation: slideUp 0.6s cubic-bezier(0.16,1,0.3,1) both;
+        }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+        .brand-icon {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border-radius: 10px; display: flex; align-items: center; justify-content: center;
+            font-size: 18px; box-shadow: 0 4px 15px rgba(99,179,237,0.3);
+        }
+        .brand-name {
+            font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .tagline { color: var(--muted); font-size: 13px; margin-bottom: 36px; font-weight: 300; }
+        h2 { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; margin-bottom: 6px; }
+        .subtitle { color: var(--muted); font-size: 14px; margin-bottom: 32px; }
+        .field { margin-bottom: 18px; }
+        label { display: block; font-size: 12px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 7px; }
+        .input-wrap { position: relative; }
+        .input-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 15px; opacity: 0.5; }
+        input {
+            width: 100%; padding: 12px 14px 12px 40px;
+            background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+            border-radius: 10px; color: var(--text);
+            font-family: 'DM Sans', sans-serif; font-size: 14px;
+            transition: border-color 0.2s, box-shadow 0.2s; outline: none;
+        }
+        input:focus { border-color: var(--accent); background: rgba(99,179,237,0.05); box-shadow: 0 0 0 3px rgba(99,179,237,0.12); }
+        input::placeholder { color: #334155; }
+        button[type="submit"] {
+            width: 100%; padding: 13px; margin-top: 8px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border: none; border-radius: 10px; color: #0d1626;
+            font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600;
+            cursor: pointer; transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+            box-shadow: 0 4px 20px rgba(99,179,237,0.25);
+        }
+        button[type="submit"]:hover { opacity: 0.92; transform: translateY(-1px); }
+        button[type="submit"]:active { transform: translateY(0); }
+
+        /* Demo buttons */
+        .demo-label {
+            font-size: 11px; font-weight: 500; color: var(--muted);
+            text-transform: uppercase; letter-spacing: 1px;
+            text-align: center; margin-bottom: 10px;
+        }
+        .demo-buttons {
+            display: flex; gap: 8px; margin-bottom: 20px;
+        }
+        .demo-btn {
+            flex: 1; padding: 9px 6px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 9px; color: var(--text);
+            font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500;
+            cursor: pointer; transition: background 0.2s, border-color 0.2s, transform 0.15s;
+            text-align: center;
+        }
+        .demo-btn:hover { background: rgba(99,179,237,0.08); border-color: rgba(99,179,237,0.35); transform: translateY(-1px); }
+        .demo-btn:active { transform: translateY(0); }
+        .demo-btn .role-icon { display: block; font-size: 16px; margin-bottom: 3px; }
+        .demo-btn .role-name { display: block; color: var(--accent); }
+
+        .flash { padding: 11px 16px; border-radius: 9px; font-size: 13px; font-weight: 500; margin-bottom: 20px; border: 1px solid transparent; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+        .flash.danger  { background: rgba(252,129,129,0.1); border-color: rgba(252,129,129,0.25); color: #fc8181; }
+        .flash.success { background: rgba(104,211,145,0.1); border-color: rgba(104,211,145,0.25); color: #68d391; }
+        .divider { height: 1px; background: var(--border); margin: 28px 0 20px; }
+        .footer-note { text-align: center; font-size: 12px; color: var(--muted); }
+        .footer-note span { color: var(--accent); }
+    </style>
+</head>
+<body>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="card">
+        <div class="brand">
+            <div class="brand-icon">💰</div>
+            <span class="brand-name">Finance Tracker</span>
+        </div>
+        <p class="tagline">Smart financial management for everyone</p>
+
+        <h2>Welcome back</h2>
+        <p class="subtitle">Sign in to access your dashboard</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <!-- Demo Login Buttons -->
+        <p class="demo-label">Try a demo account</p>
+        <div class="demo-buttons">
+            <button type="button" class="demo-btn" onclick="demoLogin('9999999999', 'admin123')">
+                <span class="role-icon">🛡️</span>
+                <span class="role-name">Admin</span>
+            </button>
+            <button type="button" class="demo-btn" onclick="demoLogin('8888888888', 'analyst123')">
+                <span class="role-icon">📊</span>
+                <span class="role-name">Analyst</span>
+            </button>
+            <button type="button" class="demo-btn" onclick="demoLogin('9876543210', 'rohan123')">
+                <span class="role-icon">👤</span>
+                <span class="role-name">User</span>
+            </button>
+        </div>
+
+        <form id="loginForm" method="POST">
+            <div class="field">
+                <label>Phone Number</label>
+                <div class="input-wrap">
+                    <span class="input-icon">📱</span>
+                    <input id="phoneInput" name="phone" placeholder="Enter your 10-digit phone number"
+                           maxlength="10" pattern="[0-9]{10}"
+                           inputmode="numeric" required>
+                </div>
+            </div>
+            <div class="field">
+                <label>Password</label>
+                <div class="input-wrap">
+                    <span class="input-icon">🔑</span>
+                    <input id="passwordInput" name="password" type="password" placeholder="Enter your password" required>
+                </div>
+            </div>
+            <button type="submit">Sign In →</button>
+        </form>
+
+        <div class="divider"></div>
+        <p class="footer-note">Secured access · <span>Finance Tracker</span> © 2025</p>
+    </div>
+
+    <script>
+        function demoLogin(phone, password) {
+            document.getElementById("phoneInput").value = phone;
+            document.getElementById("passwordInput").value = password;
+            document.getElementById("loginForm").submit();
+        }
+    </script>
+</body>
+</html>
